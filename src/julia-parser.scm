@@ -729,7 +729,7 @@
 ;; symbol tokens that do not simply parse to themselves when appearing alone as
 ;; an element of an argument list
 (define non-standalone-symbol-token?
-  (Set (append operators reserved-words '(.... mutable primitive abstract))))
+  (Set (append operators reserved-words '(.... mutable primitive abstract recursive))))
 
 ; parse-eq* is used where commas are special, for example in an argument list
 (define (parse-eq* s)
@@ -1094,7 +1094,7 @@
              (fix-syntactic-unary (list op arg)))))))
 
 (define block-form? (Set '(block quote if for while let function macro abstract primitive struct
-                                 try module)))
+                                 try module recursive)))
 
 ;; handle ^ and .^
 ;; -2^3 is parsed as -(2^3), so call parse-decl for the first argument,
@@ -1137,7 +1137,7 @@
     (parse-call-with-initial-ex s (parse-unary-prefix s) nxt)))
 
 (define (parse-call-with-initial-ex s ex tok)
-  (if (or (initial-reserved-word? tok) (memq tok '(mutable primitive abstract)))
+  (if (or (initial-reserved-word? tok) (memq tok '(mutable primitive abstract recursive)))
       (parse-resword s ex)
       (parse-call-chain s ex #f)))
 
@@ -1369,7 +1369,16 @@
   (let ((sig (parse-subtype-spec s)))
     (begin0 (list 'struct (if mut? '(true) '(false)) sig (parse-block s parse-struct-field))
             (expect-end s word))))
-
+(define (parse-recursive-def s word)
+  (begin0 (list 'recursive
+            (parse-block s
+              (lambda (x)
+                (if (memv (peek-token s) '(struct)) ;;todo: find better if
+                      (begin
+                       (take-token s)
+                       (parse-struct-def x #f word))
+                       (error "recusive definitions must be structs")))))
+          (expect-end s word)))
 ;; consume any number of line endings from a token stream
 (define (take-lineendings s)
   (let ((nt (peek-token s)))
@@ -1509,6 +1518,9 @@
        ((struct)
         (begin (take-token s)
                (parse-struct-def s #f word)))
+       ((recursive)
+        (begin (take-token s)
+               (parse-recursive-def s word)))
        ((mutable)
         (if (not (eq? (peek-token s) 'struct))
             (parse-call-chain s word #f)
