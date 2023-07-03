@@ -670,7 +670,7 @@ static void jl_eval_errorf(jl_module_t *m, const char* fmt, ...)
 }
 
 jl_value_t *jl_toplevel_eval_flex(jl_module_t *JL_NONNULL m, jl_value_t *e, int fast, int expanded)
-{
+{   
     jl_task_t *ct = jl_current_task;
     if (!jl_is_expr(e)) {
         if (jl_is_linenode(e)) {
@@ -836,6 +836,7 @@ jl_value_t *jl_toplevel_eval_flex(jl_module_t *JL_NONNULL m, jl_value_t *e, int 
         return jl_nothing;
     }
     else if (head == jl_global_sym) {
+        //tutaj powinno być? sprawdzić jak działa dla structa
         jl_eval_global_expr(m, ex, 0);
         JL_GC_POP();
         return jl_nothing;

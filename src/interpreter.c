@@ -340,6 +340,10 @@ static jl_value_t *eval_value(jl_value_t *e, interpreter_state *s)
     else if (head == jl_cfunction_sym) {
         jl_error("`cfunction` requires the compiler");
     }
+    if (head == jl_rectypes_sym){
+        jl_error("unsupported rectypes");
+    }
+
     jl_errorf("unsupported or misplaced expression %s", jl_symbol_name(head));
     abort();
 }

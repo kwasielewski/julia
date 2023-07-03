@@ -1377,8 +1377,8 @@
                       (begin
                        (take-token s)
                        (parse-struct-def x #f word))
-                       (error "recursive definitions must be structs")))))
-          (expect-end s word)))
+                       (error "recursive definitions must be structs"))))
+                       (expect-end s word))))
 ;; consume any number of line endings from a token stream
 (define (take-lineendings s)
   (let ((nt (peek-token s)))

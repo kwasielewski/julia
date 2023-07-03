@@ -111,6 +111,7 @@ JL_DLLEXPORT jl_sym_t *jl_acquire_sym;
 JL_DLLEXPORT jl_sym_t *jl_release_sym;
 JL_DLLEXPORT jl_sym_t *jl_acquire_release_sym;
 JL_DLLEXPORT jl_sym_t *jl_sequentially_consistent_sym;
+JL_DLLEXPORT jl_sym_t *jl_rectypes_sym;
 
 
 static const uint8_t flisp_system_image[] = {
@@ -373,6 +374,7 @@ void jl_init_common_symbols(void)
     jl_release_sym = jl_symbol("release");
     jl_acquire_release_sym = jl_symbol("acquire_release");
     jl_sequentially_consistent_sym = jl_symbol("sequentially_consistent");
+    jl_rectypes_sym = jl_symbol("rectypes");
 }
 
 JL_DLLEXPORT void jl_lisp_prompt(void)
@@ -523,6 +525,7 @@ static jl_value_t *scm_to_julia_(fl_context_t *fl_ctx, value_t e, jl_module_t *m
             n++;
         // nodes with special representations
         jl_value_t *ex = NULL, *temp = NULL;
+
         if (sym == jl_line_sym && (n == 1 || n == 2)) {
             jl_value_t *linenum = scm_to_julia_(fl_ctx, car_(e), mod);
             jl_value_t *file = jl_nothing;
@@ -605,6 +608,11 @@ static jl_value_t *scm_to_julia_(fl_context_t *fl_ctx, value_t e, jl_module_t *m
         JL_GC_POP();
         if (sym == jl_list_sym)
             return (jl_value_t*)((jl_expr_t*)ex)->args;
+        if (sym == jl_rectypes_sym){
+            //do tego momentu dociera
+            
+            //exit(24);
+        }
         return (jl_value_t*)ex;
     }
     if (iscprim(e) && cp_class((cprim_t*)ptr(e)) == fl_ctx->wchartype) {
